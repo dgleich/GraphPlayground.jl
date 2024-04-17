@@ -1,4 +1,14 @@
 
+function _count_edges!(counter, edges)
+  for e in edges
+    src, dst = _srcdst(e)
+    counter[src] += 1
+    counter[dst] += 1
+  end   
+end 
+
+
+
 """
 LinkForce(edges)
 LinkForce(edges; strength=50)

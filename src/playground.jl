@@ -1,6 +1,6 @@
 
 function igraphplot!(ax, g; kwargs...)
-  p = graphplot!(ax, g, sim, edge_width = [2.0 for i in 1:ne(g)],
+  p = graphplot!(ax, g, edge_width = [2.0 for i in 1:ne(g)],
               edge_color = [colorant"gray" for i in 1:ne(g)],
               node_size = [10 for i in 1:nv(g)],
               node_color = [colorant"black" for i in 1:nv(g)], 

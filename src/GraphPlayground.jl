@@ -4,6 +4,8 @@ using GraphMakie
 using Random
 using Colors
 using Makie
+using LinearAlgebra
+using Graphs
 
 include("utilities.jl")
 include("simulation.jl")

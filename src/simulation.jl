@@ -37,9 +37,6 @@ end
 ForceSimulation(nodes; kwargs...) = ForceSimulation(Tuple{Float32,Float32}, nodes; kwargs...)
 
 function simstep!(alpha, positions, velocities, forces, decay, fixed)
-  for f in forces
-    force!(alpha, positions, velocities, f)
-  end
   for i in eachindex(positions)
     if fixed[i] == falses
       positions[i] = positions[i] .+ velocities[i]
@@ -48,8 +45,16 @@ function simstep!(alpha, positions, velocities, forces, decay, fixed)
   end
 end
 
+function apply_forces!(alpha, sim, forces)
+  for f in forces
+    force!(alpha, sim, f)
+  end
+end
+
 function step!(sim::ForceSimulation)
-  simstep!(step!(sim.alpha), sim.positions, 
+  alpha = step!(sim.alpha)
+  apply_forces!(alpha, sim, sim.forces)
+  simstep!(alpha, sim.positions, 
     sim.velocities, sim.forces, sim.velocity_decay, sim.fixed
     )
 end
