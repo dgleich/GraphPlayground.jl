@@ -7,7 +7,7 @@ LinkForce(edges; strength=(i,e,src,dst)->val[src]*val[dst], distance=50)
 struct LinkForce{T}
   args::T 
 end 
-LinkForce(edges) = LinkForce(edges=edges)
+#LinkForce(edges) = LinkForce(edges=edges)
 LinkForce(;kwargs...) = LinkForce{typeof(kwargs)}(kwargs)
 export LinkForce
 

@@ -2,11 +2,11 @@
   nodes = [1,2]
   edges = [(1, 2)]
   positions = [Point2f(0.0, 0.0), Point2f(1.0, 0.0)]
-  sim = InteractiveGraph.ForceSimulation(Point2f, nodes; 
+  sim = ForceSimulation(Point2f, nodes; 
     positions=positions,
-    link=InteractiveGraph.LinkForce(edges=edges, strength=10, distance=1.0, bias=0.5))
+    link=LinkForce(edges=edges, strength=10, distance=1.0, bias=0.5))
   iforce = sim.forces.link
-  InteractiveGraph.force!(0.1, sim, iforce)  # Assume alpha=0.1
+  GraphPlayground.force!(0.1, sim, iforce)  # Assume alpha=0.1
 
   @test sim.velocities[1][1] > 0  # Node 1 velocity should decrease (move left)
   @test sim.velocities[2][1] < 0  # Node 2 velocity should increase (move right)

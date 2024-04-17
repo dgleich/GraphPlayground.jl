@@ -1,4 +1,4 @@
-g = wheel_graph(10)
+
 function igraphplot!(ax, g; kwargs...)
   p = graphplot!(ax, g, sim, edge_width = [2.0 for i in 1:ne(g)],
               edge_color = [colorant"gray" for i in 1:ne(g)],
@@ -34,7 +34,7 @@ function igraphplot!(ax, g; kwargs...)
   return p
 end 
 
-function plot_graph_with_buttons()
+function plot_graph_with_buttons(g)
   f = Figure()
   ax = Axis(f[1, 1])
   ax.limits = (0, 640, 0, 480)
@@ -85,5 +85,3 @@ function plot_graph_with_buttons()
   end
   f
 end
-
-f = plot_graph_with_buttons()

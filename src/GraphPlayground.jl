@@ -1,6 +1,9 @@
 module GraphPlayground
 
 using GraphMakie
+using Random
+using Colors
+using Makie
 
 include("utilities.jl")
 include("simulation.jl")
