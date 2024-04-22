@@ -6,6 +6,10 @@ using Colors
 using Makie
 using LinearAlgebra
 using Graphs
+using NearestNeighbors
+
+## import setindex from Base
+import Base.setindex
 
 include("utilities.jl")
 include("simulation.jl")
