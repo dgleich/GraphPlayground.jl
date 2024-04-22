@@ -2,7 +2,7 @@ using GraphPlayground
 using Test
 using Aqua
 using JET
-
+using StableRNGs
 using GeometryBasics
 
 
@@ -10,6 +10,7 @@ using GeometryBasics
 @testset "GraphPlayground.jl" begin
 
   include("linkforce.jl")
+  include("manybodyforce.jl")
 
   @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(GraphPlayground;
