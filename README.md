@@ -13,7 +13,7 @@ It includes a port of the [d3-force]() package to Julia to handle the force dire
 Usage
 -----
 ```
-using Graphs, GraphPlayground
+using Graphs, GraphPlayground, GLMakie
 g = grid([10,10]) # make a 10x10 grid from Graphs
 playground(g)
 ```
