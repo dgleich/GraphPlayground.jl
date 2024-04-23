@@ -19,3 +19,6 @@ Graphs = "1"
 Makie = "0.20"
 NearestNeighbors = "0.4"
 julia = "1.10"
+Random = "1"
+LinearAlgebra = "1"
+

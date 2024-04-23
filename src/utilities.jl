@@ -9,7 +9,12 @@ Create an _eltype function that also handles NTuple types. This is useful to avo
   do can be done with NTuple types. This forwards to Base.eltype for all other types.
 """
 _eltype(x) = Base.eltype(x) 
-_eltype(x::NTuple{N, T}) where {N, T} = T
+# Aqua detects this as having an unbound type 
+#_eltype(::NTuple{N, T}) where {N, T} = T
+# so we use this ugly hack from StaticArrays instead ... 
+_TupleOf{T} = Tuple{T,Vararg{T}}
+_eltype(::Union{_TupleOf{T}, Type{<:_TupleOf{T}}}) where {T} = T
+
 
 
 """

@@ -43,6 +43,7 @@ function approxforces(pts)
   max_distance2 = Float32(Inf)
   min_distance2 = Float32(1.0)
   GraphPlayground.manybodyforce!(Float32(1.0), pts, pts, vel, strengths, min_distance2, max_distance2, theta2, rng)
+  return vel
 end
 
 function test_simpleforces(npts, approxfun, rtol; kwargs...)
