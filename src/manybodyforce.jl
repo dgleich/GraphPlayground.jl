@@ -13,7 +13,6 @@ struct ManyBodyForce{T}
   args::T 
 end 
 ManyBodyForce(;kwargs...) = ManyBodyForce{typeof(kwargs)}(kwargs)
-export ManyBodyForce
 
 struct InitializedManyBodyForce
   strengths
@@ -23,11 +22,11 @@ struct InitializedManyBodyForce
   rng
 end
 
-function initialize(link::ManyBodyForce, nodes; 
-  strength = -30.0, 
-  min_distance2 = 1.0,
-  max_distance2 = Inf,
-  theta2 = 0.81,
+function initialize(body::ManyBodyForce, nodes; 
+  strength = Float32(-30.0), 
+  min_distance2 = Float32(1.0),
+  max_distance2 = Float32(Inf),
+  theta2 = Float32(0.81),
   random = nothing)
 
   strength = _handle_node_values(nodes, strength)
@@ -107,13 +106,14 @@ function _build_tree_info(T::KDTree, pts, strengths)
 end 
 
 @inline function _compute_force(rng, pt1, pt2, strength::T, max_distance2::T, min_distance2::T, alpha::T) where {T <: Real} 
-  @inbounds d = pt2 .- pt1
-  @inbounds d2 = dot(d, d)
+  d = pt2 .- pt1
+  d = jiggle(d, rng)
+  d2 = dot(d, d)
 
   if d2 < max_distance2
-    d = jiggle(d, rng)
+    #d = jiggle(d, rng)
     if d2 < min_distance2
-      @fastmath @inbounds d2 = sqrt(min_distance2*d2)
+      @fastmath d2 = sqrt(min_distance2*d2)
     end
 
     w = strength*alpha / d2
@@ -135,7 +135,7 @@ function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, cente
       #Tidx = T.reordered ? Tidx : ptsidx
       if Tidx != target 
         ncomp += 1
-        @inbounds  pt = treepts[Tidx]
+        @inbounds pt = treepts[Tidx]
         f = f .+ forcefunc(targetpt, pt, Float32(-30.0))
       end 
     end 
@@ -171,14 +171,21 @@ function _applyforces!(T, vel, centers, weights, widths, forcefunc, theta2)
 end
 
 
+function _add_force!(vel, localvel, perm)
+  for i in eachindex(vel)
+    vel[i] = vel[i] .+ localvel[perm[i]]
+    @assert(isnan(vel[i]) == false)
+  end 
+end
+
 function manybodyforce!(alpha::Real, nodes, pos, vel, strengths, min_distance2, max_distance2, theta2, rng)
   T = KDTree(pos)
   centers, weights, widths = _build_tree_info(T, pos, strengths)
-  forcefunc = @inline (u, v, strength) -> _compute_force(rng, u, v, strength, max_distance2, min_distance2, alpha)
+  forcefunc = @inline (u, v, strength) -> _compute_force(rng, u, v, strength, max_distance2, min_distance2, Float32(alpha))
   localvel = similar(vel) 
-  fill!(localvel, 0 .* first(localvel)) # zero out local velocities 
+  fill!(localvel, 0 .* first(vel)) # zero out local velocities 
   _applyforces!(T, localvel, centers, weights, widths, forcefunc, theta2)
-  vel .= localvel[invperm(T.indices)] # this takes 2 msec at 100k points 
+  _add_force!(vel, localvel, invperm(T.indices)) # this takes 2 msec at 100k points 
 end
 
 

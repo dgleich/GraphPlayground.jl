@@ -1,10 +1,12 @@
 
-function igraphplot!(ax, g; kwargs...)
+function igraphplot!(ax, g, sim; kwargs...)
   p = graphplot!(ax, g, edge_width = [2.0 for i in 1:ne(g)],
               edge_color = [colorant"gray" for i in 1:ne(g)],
               node_size = [10 for i in 1:nv(g)],
               node_color = [colorant"black" for i in 1:nv(g)], 
+              layout = sim.positions, 
               kwargs...)
+
   hidedecorations!(ax); hidespines!(ax)
   ax.aspect = DataAspect()
   deregister_interaction!(ax, :rectanglezoom)
@@ -24,9 +26,16 @@ function igraphplot!(ax, g; kwargs...)
   register_interaction!(ax, :ehover, ehover)
 
   function node_drag_action(state, idx, event, axis)
-    p[:node_pos][][idx] = event.data
-    p[:node_pos][] = p[:node_pos][]
-
+    if state == false
+      # this means it's the end of the drag
+      freenode!(sim, idx)
+      sim.alpha.alpha_target = 0.001
+    else 
+      fixnode!(sim, idx, event.data)
+      sim.alpha.alpha_target = 0.3
+      #p[:node_pos][][idx] = event.data
+      p[:node_pos][] = p[:node_pos][]
+    end 
   end
   ndrag = NodeDragHandler(node_drag_action)
   register_interaction!(ax, :ndrag, ndrag)
@@ -34,27 +43,36 @@ function igraphplot!(ax, g; kwargs...)
   return p
 end 
 
-function plot_graph_with_buttons(g)
+function playground(g)
+  n = nv(g) 
   f = Figure()
-  ax = Axis(f[1, 1])
-  ax.limits = (0, 640, 0, 480)
+  buta = Button(f[1, 1], label="Animate", tellwidth=false)
+  buts = Button(f[1, 2], label="Stop", tellwidth=false)
+  butr = Button(f[1, 3], label="Reheat", tellwidth=false)
+  ax = Axis(f[2, :])
+  ax.limits = (0, 800, 0, 600)
   
-  buta = Button(f[2, :], label="Animate", tellwidth=false)
-  buts = Button(f[3, :], label="Stop", tellwidth=false)
+  #buta = Button(f[2, :], label="Animate", tellwidth=false)
+  #buts = Button(f[3, :], label="Stop", tellwidth=false)
   #sl = Slider(f[4, :], range=range(0, 2 * pi, 50))
-  
-  p = igraphplot!(ax, g)
 
   sim = ForceSimulation(Point2f, vertices(g); 
-    link=LinkForce(edges(g)), 
-    center=CenterForce(Point2f(320, 240)),
+    link=LinkForce(edges=edges(g)), 
+    center=CenterForce(Point2f(400, 300)),
     charge=ManyBodyForce(),
     )
+  step!(sim)    
+
+  p = igraphplot!(ax, g, sim)    
 
   p[:node_pos][] = sim.positions
   
   taskref = Ref{Union{Nothing,Task}}(nothing)
   should_close = Ref(false)
+
+  on(butr.clicks) do _
+    sim.alpha.alpha = 1.0
+  end
 
   on(buta.clicks) do _
     if taskref[] === nothing
@@ -63,7 +81,6 @@ function plot_graph_with_buttons(g)
           sleep(1 / 30)
 
           step!(sim)
-
           p[:node_pos][] = sim.positions
 
           should_close[] && break

@@ -35,22 +35,26 @@ function initialize(center::CenterForce, nodes; kwargs...)
   return center
 end 
 
+function centerforce!(n::Integer, pos, centertarget, strength)
+  ptsum = 0 .* first(pos) # get a zero element of the same type as pos[1]
+  w = one(_eltype(_eltype(pos)))/n
+  for i in 1:n
+    ptsum = ptsum .+ (w .* pos[i]) # can't use .+= because it Point2f isn't mutable 
+  end
+  ptcenter = ptsum # we handle the 1/n with the w now.
+  centerdir = (ptcenter .- centertarget)*strength 
+  for i in eachindex(pos) 
+    pos[i] = pos[i] .- centerdir
+  end
+end
+
 function force!(alpha::Real, sim::ForceSimulation, center::CenterForce) 
   pos = sim.positions
   centertarget = center.center
   strength = center.strength
   nodes = sim.nodes
-  ptsum = 0 .* first(pos) # get a zero element of the same type as pos[1]
-  for n in nodes
-    ptsum = ptsum .+ pos[n] # can't use .+= because it Point2f isn't mutable 
-  end
-
-  ptcenter = ptsum ./ length(nodes)
-  centerdir = (ptcenter .- centertarget)*strength 
   
-  for i in eachindex(pos) 
-    pos[i] = pos[i] .- centerdir
-  end
+  centerforce!(length(nodes), pos, centertarget, strength)
 end 
 
 function Base.show(io::IO, z::CenterForce)

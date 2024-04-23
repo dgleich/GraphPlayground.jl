@@ -1,4 +1,17 @@
 
+
+
+"""
+    _eltype(x)
+
+Create an _eltype function that also handles NTuple types. This is useful to avoid
+  a dependency on explicit point types of static arrays. Since everything we can
+  do can be done with NTuple types. This forwards to Base.eltype for all other types.
+"""
+_eltype(x) = Base.eltype(x) 
+_eltype(x::NTuple{N, T}) where {N, T} = T
+
+
 """
     jiggle(rng::AbstractRNG)
 
@@ -37,7 +50,7 @@ jiggle(x, rng)
 ```
 """
 function jiggle(x, rng::AbstractRNG) 
-  return map(c -> c == 0 ? jiggle(rng) : c, x)
+  return map(c -> c == 0 ? _eltype(c)(jiggle(rng)) : c, x)
 end 
 
 """
@@ -80,6 +93,8 @@ _srcdst(e)
 function _srcdst(e::Tuple)
   return e
 end
+
+
 
 
 """

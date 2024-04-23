@@ -23,7 +23,7 @@ function ForceSimulation(T::Type, nodes; rng=Random.MersenneTwister(0xd3ce),
   # 0xd34ce -> "d3-force" ? d3 - 4 - ce? 
   n = length(nodes)
   if positions === nothing
-    positions = rand(rng, T, n)
+    positions = Float32(sqrt(n)) .* rand(rng, T, n)
   end
   velocities = zeros(T, n)
   forces = NamedTuple( map(keys(kwargs)) do f 
@@ -38,7 +38,7 @@ ForceSimulation(nodes; kwargs...) = ForceSimulation(Tuple{Float32,Float32}, node
 
 function simstep!(alpha, positions, velocities, forces, decay, fixed)
   for i in eachindex(positions)
-    if fixed[i] == falses
+    if fixed[i] == false
       positions[i] = positions[i] .+ velocities[i]
       velocities[i] = velocities[i]*decay
     end 

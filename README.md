@@ -14,7 +14,7 @@ Usage
 -----
 ```
 using Graphs, GraphPlayground
-g = wheel_graph(15)
+g = grid([10,10]) # make a 10x10 grid from Graphs
 playground(g)
 ```
 

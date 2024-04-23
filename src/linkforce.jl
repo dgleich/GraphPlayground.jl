@@ -19,7 +19,6 @@ struct LinkForce{T}
 end 
 #LinkForce(edges) = LinkForce(edges=edges)
 LinkForce(;kwargs...) = LinkForce{typeof(kwargs)}(kwargs)
-export LinkForce
 
 struct InitializedLinkForce
   edges
