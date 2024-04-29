@@ -6,9 +6,9 @@
 [![Coverage](https://codecov.io/gh/dgleich/GraphPlayground.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/dgleich/GraphPlayground.jl)
 [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-This is an extension of [GraphMakie.jl]() that creates an interactive window for graph exploration. 
+This is an extension of [GraphMakie.jl](https://github.com/MakieOrg/GraphMakie.jl) that creates an interactive window for graph exploration. 
 
-It includes a port of the [d3-force]() package to Julia to handle the force directed layout. This may be removed at some point. 
+It includes a port of the [d3-force](https://d3js.org/d3-force) package to Julia to handle the force directed layout. This may be removed at some point. 
 
 Usage
 -----
