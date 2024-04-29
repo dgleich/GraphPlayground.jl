@@ -43,7 +43,8 @@ function igraphplot!(ax, g, sim; kwargs...)
   return p
 end 
 
-function playground(g)
+function playground(g;
+  initial_iterations = 10)
   n = nv(g) 
   f = Figure()
   buta = Button(f[1, 1], label="Animate", tellwidth=false)
@@ -52,16 +53,16 @@ function playground(g)
   ax = Axis(f[2, :])
   ax.limits = (0, 800, 0, 600)
   
-  #buta = Button(f[2, :], label="Animate", tellwidth=false)
-  #buts = Button(f[3, :], label="Stop", tellwidth=false)
-  #sl = Slider(f[4, :], range=range(0, 2 * pi, 50))
-
   sim = ForceSimulation(Point2f, vertices(g); 
     link=LinkForce(edges=edges(g)), 
-    center=CenterForce(Point2f(400, 300)),
+    #center=CenterForce(Point2f(400, 300)),
+    center = PositionForce(target=Point2f(400, 300)),
     charge=ManyBodyForce(),
     )
-  step!(sim)    
+  for _ in 1:initial_iterations
+    step!(sim)
+  end
+  
 
   p = igraphplot!(ax, g, sim)    
 
@@ -71,7 +72,7 @@ function playground(g)
   should_close = Ref(false)
 
   on(butr.clicks) do _
-    sim.alpha.alpha = 1.0
+    sim.alpha.alpha = min(sim.alpha.alpha * 10, 1.0)
   end
 
   on(buta.clicks) do _

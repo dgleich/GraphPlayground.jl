@@ -5,6 +5,9 @@ end
 function _handle_node_values(nodes, x::Real)
   return range(x, x, length(nodes))
 end 
+function _handle_node_values(nodes, x::Tuple)
+  return ConstArray(x, (length(nodes),))
+end 
 function _handle_node_values(nodes, x::Union{AbstractArray,Dict})
   return x
 end
@@ -21,7 +24,42 @@ function _handle_link_values(edges, x::Union{AbstractArray,Dict})
 end
 
 
+import Base.getindex, Base.size 
+struct ConstArray{T,N} <: AbstractArray{T,N}
+  val::T
+  shape::NTuple{N,Int}
+end
+getindex(c::ConstArray, i::Int...) = c.val
+size(c::ConstArray) = c.shape 
 
+
+"""
+`CenterForce` represents a centering adjustment in a force simulation. 
+it has two parameters: 
+
+* `center`: The center of the force, which can be anything resembling a point
+* `strength`: The strength of the force, which is a real number
+
+Note that CenterForce directly applies the force to the 
+positions of the nodes in the simulation instead of updating their velocities.
+
+Use PositionForce to apply a force to the velocities of the nodes instead. 
+(Also, please don't combine PositionForce and CenterForce.)
+
+Examples:
+---------
+n = 
+rad = 10*rand(100)
+sim = ForceSimulation(Point2f, eachindex(rad);
+    center=CenterForce(center, strength=1.0),
+    collide=CollisionForce(radius=rad)
+    )
+p = scatter(sim.positions, markersize=rad)
+for i in 1:100
+    step!(sim)
+    p[:node_pos][] = sim.positions
+end    
+"""    
 struct CenterForce{T, V <: Real}
   center::T
   strength::V
@@ -59,4 +97,57 @@ end
 
 function Base.show(io::IO, z::CenterForce)
   print(io, "CenterForce with center ", z.center, " and strength ", z.strength)
+end 
+
+struct PositionForce{T}
+  args::T
+end 
+PositionForce(;kwargs...) = PositionForce{typeof(kwargs)}(kwargs)
+
+struct InitializedPositionForce
+  targets
+  strengths
+end 
+
+function initialize(pforce::PositionForce, nodes;
+  strength=0.1,
+  target=(0,0), kwargs...)
+
+  strengths = _handle_node_values(nodes, strength)
+
+  # need to be careful with the center, because it could be a single value or a tuple
+  targets = _handle_node_values(nodes, target)
+  if targets === target 
+    if length(targets) != length(nodes)
+      targets = ConstArray(target, (length(nodes),))
+    end 
+  end
+  
+  return InitializedPositionForce(targets, strengths)
+end 
+
+function positionforce!(alpha, nodes, pos, vel, strengths, targets)
+  for i in nodes
+    p = pos[i]
+    t = targets[i]
+    s = strengths[i]
+    # TODO if you just want a particular component to be forced to a particular value
+    # the idea is that you could do that with an NaN mask on the points. 
+    # isvalid = map(isnan, t) 
+    # t2 = map(x->isnan(x) ? zero(_eltype(t))) : x, t)
+    vel[i] = vel[i] .+ (t .- p) .* s .* alpha
+  end 
+end
+
+function force!(alpha::Real, sim::ForceSimulation, pforce::InitializedPositionForce) 
+  pos = sim.positions
+  targets = pforce.targets
+  strengths = pforce.strengths
+  nodes = sim.nodes
+  
+  positionforce!(alpha, nodes, pos, sim.velocities, strengths, targets)
+end 
+
+function Base.show(io::IO, z::InitializedPositionForce)
+  print(io, "PositionForce with targets ", z.targets, " and strength ", z.strengths)
 end 

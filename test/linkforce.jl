@@ -2,8 +2,7 @@
   nodes = [1,2]
   edgelist = [(1, 2)]
   positions = [Point2f(0.0, 0.0), Point2f(10.0, 0.0)]
-  sim = ForceSimulation(Point2f, nodes; 
-    positions=positions,
+  sim = ForceSimulation(positions, nodes; 
     link=LinkForce(edges=edgelist, strength=10, distance=1.0, bias=0.5))
   iforce = sim.forces.link
   GraphPlayground.force!(0.1, sim, iforce)  # Assume alpha=0.1

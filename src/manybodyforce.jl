@@ -174,7 +174,6 @@ end
 function _add_force!(vel, localvel, perm)
   for i in eachindex(vel)
     vel[i] = vel[i] .+ localvel[perm[i]]
-    @assert(isnan(vel[i]) == false)
   end 
 end
 

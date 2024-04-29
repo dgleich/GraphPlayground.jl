@@ -15,17 +15,15 @@ end
       a list of objects. 
     - kwargs are a list of forces. 
 """
-function ForceSimulation(T::Type, nodes; rng=Random.MersenneTwister(0xd3ce), 
-    positions=nothing, 
-    alpha = CoolingStepper(),
-    velocity_decay = 0.6,
-    kwargs...)
-  # 0xd34ce -> "d3-force" ? d3 - 4 - ce? 
+function ForceSimulation(positions, nodes; 
+  rng=Random.MersenneTwister(0xd3ce), # 0xd34ce -> "d3-force" ? d3 - 4 - ce? 
+  alpha = CoolingStepper(),
+  velocity_decay = 0.6,
+  kwargs...)
   n = length(nodes)
-  if positions === nothing
-    positions = Float32(sqrt(n)) .* rand(rng, T, n)
-  end
-  velocities = zeros(T, n)
+  T = eltype(positions)
+  velocities = Vector{T}(undef, n)
+  fill!(velocities, ntuple(i->0, length(first(positions)))) # fancy way of writing 0s
   forces = NamedTuple( map(keys(kwargs)) do f 
     f => initialize(kwargs[f], nodes; random=rng, kwargs[f].args...)
   end)
@@ -33,14 +31,31 @@ function ForceSimulation(T::Type, nodes; rng=Random.MersenneTwister(0xd3ce),
   ForceSimulation(nodes, forces, positions, velocities, rng,
     alpha, velocity_decay, fixed
     )
+end
+function ForceSimulation(T::Type, nodes; 
+    rng=Random.MersenneTwister(0xd3ce), # 0xd34ce -> "d3-force" ? d3 - 4 - ce? 
+    kwargs...)
+  # 0xd34ce -> "d3-force" ? d3 - 4 - ce? 
+  n = length(nodes)
+  positions = _initial_positions(T, nodes, rng)
+  return ForceSimulation(positions, nodes; rng, kwargs...)
 end 
 ForceSimulation(nodes; kwargs...) = ForceSimulation(Tuple{Float32,Float32}, nodes; kwargs...)
+
+function _initial_positions(T, nodes, rng)
+  n = length(nodes)
+  pos = Vector{T}(undef, n)
+  for i in 1:n
+    pos[i] = sqrt(n) .* ntuple(i->rand(rng), length(first(pos)))
+  end
+  return pos
+end
 
 function simstep!(alpha, positions, velocities, forces, decay, fixed)
   for i in eachindex(positions)
     if fixed[i] == false
       positions[i] = positions[i] .+ velocities[i]
-      velocities[i] = velocities[i]*decay
+      velocities[i] = velocities[i] .* decay
     end 
   end
 end
@@ -57,6 +72,7 @@ function step!(sim::ForceSimulation)
   simstep!(alpha, sim.positions, 
     sim.velocities, sim.forces, sim.velocity_decay, sim.fixed
     )
+  return sim
 end
 
 function fixnode!(sim::ForceSimulation, i, pos)

@@ -11,6 +11,7 @@ using GeometryBasics
 
   include("linkforce.jl")
   include("manybodyforce.jl")
+  include("positionforce.jl")
 
   @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(GraphPlayground;

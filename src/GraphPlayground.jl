@@ -16,7 +16,7 @@ include("simulation.jl")
 export ForceSimulation, step!, fixnode!, freenode!
 
 include("simpleforces.jl")
-export CenterForce
+export CenterForce, PositionForce
 include("linkforce.jl")
 export LinkForce
 include("manybodyforce.jl")
