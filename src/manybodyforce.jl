@@ -58,7 +58,7 @@ function manybodyforce!(alpha::Real, nodes, pos, vel, strengths, min_distance2, 
 end
 =#
 
-function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, rect) 
+function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, strengths, rect) 
   center = 0 .* first(centers)
   weight = zero(eltype(weights))
   CType = typeof(center)
@@ -70,8 +70,9 @@ function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, rect)
     for ptsidx in NearestNeighbors.get_leaf_range(T.tree_data, idx)
       npts += 1
       Tidx = T.reordered ? ptsidx : idxmap[ptsidx]
+      origidx = T.reordered == false ? ptsidx : idxmap[ptsidx] 
       center = center .+ treepts[Tidx]
-      weight += (-30) # need to make it the actual weight 
+      weight += strengths[origidx] 
     end 
     center = center ./ npts
     return (center::CType, weight::WType)
@@ -84,8 +85,8 @@ function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, rect)
     rect_right = NearestNeighbors.HyperRectangle(@inbounds(setindex(rect.mins, split_val, split_dim)), rect.maxes)
     rect_left = NearestNeighbors.HyperRectangle(rect.mins, @inbounds setindex(rect.maxes, split_val, split_dim))
 
-    lcenter, lweight = _walk(T, n, left, centers, weights, widths, rect_left)
-    rcenter, rweight = _walk(T, n, right, centers, weights, widths, rect_right)
+    lcenter, lweight = _walk(T, n, left, centers, weights, widths, strengths, rect_left)
+    rcenter, rweight = _walk(T, n, right, centers, weights, widths, strengths, rect_right)
 
     centers[idx] = (abs(lweight) .* lcenter .+ abs(rweight) .* rcenter) ./ (abs(lweight) .+ abs(rweight))
     weights[idx] = lweight + rweight
@@ -101,7 +102,7 @@ function _build_tree_info(T::KDTree, pts, strengths)
   widths = Vector{Float32}(undef, n)
   # we need to do a post-order traversal
   
-  _walk(T, n, 1, centers, weights, widths, T.hyper_rec)
+  _walk(T, n, 1, centers, weights, widths, strengths, T.hyper_rec)
   return centers, weights, widths 
 end 
 
@@ -123,11 +124,11 @@ end
   end 
 end 
 
-function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, centers, weights, widths, theta2, vel)
+function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, centers, weights, widths, strengths, theta2, vel, velidx)
   #f = 0 .* targetpt
   ncomp = 0 
   if NearestNeighbors.isleaf(length(T.nodes), treeindex)
-    #idxmap = T.indices
+    idxmap = T.indices
     treepts = T.data 
     f = 0 .* targetpt
     @simd for Tidx in NearestNeighbors.get_leaf_range(T.tree_data, treeindex)    
@@ -136,10 +137,11 @@ function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, cente
       if Tidx != target 
         ncomp += 1
         @inbounds pt = treepts[Tidx]
-        f = f .+ forcefunc(targetpt, pt, Float32(-30.0))
+        origidx = T.reordered == false ? Tidx : idxmap[Tidx]
+        f = f .+ forcefunc(targetpt, pt, strengths[origidx])
       end 
     end 
-    @inbounds vel[target] = vel[target] .+ f
+    @inbounds vel[velidx] = vel[velidx] .+ f
   else 
     @inbounds center = centers[treeindex]
     @inbounds w = weights[treeindex]
@@ -149,31 +151,25 @@ function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, cente
     d2 = dot(d,d)
 
     if (width*width / theta2) < d2 
-      @inbounds vel[target] = vel[target] .+ forcefunc(targetpt, center, w)
+      @inbounds vel[velidx] = vel[velidx] .+ forcefunc(targetpt, center, w)
       ncomp += 1
       # and then don't recurse... 
     else 
       # otherwise, recurse... 
       left, right = NearestNeighbors.getleft(treeindex), NearestNeighbors.getright(treeindex)
 
-      ncomp += _compute_force_on_node(target, left, targetpt, T, forcefunc, centers, weights, widths, theta2, vel)
-      ncomp += _compute_force_on_node(target, right, targetpt, T, forcefunc, centers, weights, widths, theta2, vel)
+      ncomp += _compute_force_on_node(target, left, targetpt, T, forcefunc, centers, weights, widths, strengths, theta2, vel, velidx)
+      ncomp += _compute_force_on_node(target, right, targetpt, T, forcefunc, centers, weights, widths, strengths, theta2, vel, velidx)
     end 
   end
   return ncomp
 end 
 
-function _applyforces!(T, vel, centers, weights, widths, forcefunc, theta2)
+function _applyforces!(T, vel, centers, weights, widths, strengths, forcefunc, theta2)
   ncomp = 0 
   for i in eachindex(T.data)
-    ncomp += _compute_force_on_node(i, 1, T.data[i], T, forcefunc, centers, weights, widths, theta2, vel)
-  end 
-end
-
-
-function _add_force!(vel, localvel, perm)
-  for i in eachindex(vel)
-    vel[i] = vel[i] .+ localvel[perm[i]]
+    velidx = T.reordered == false ? i : T.indices[i]  # this is the index of i in the real vel array
+    ncomp += _compute_force_on_node(i, 1, T.data[i], T, forcefunc, centers, weights, widths, strengths, theta2, vel, velidx)
   end 
 end
 
@@ -181,10 +177,7 @@ function manybodyforce!(alpha::Real, nodes, pos, vel, strengths, min_distance2, 
   T = KDTree(pos)
   centers, weights, widths = _build_tree_info(T, pos, strengths)
   forcefunc = @inline (u, v, strength) -> _compute_force(rng, u, v, strength, max_distance2, min_distance2, Float32(alpha))
-  localvel = similar(vel) 
-  fill!(localvel, 0 .* first(vel)) # zero out local velocities 
-  _applyforces!(T, localvel, centers, weights, widths, forcefunc, theta2)
-  _add_force!(vel, localvel, invperm(T.indices)) # this takes 2 msec at 100k points 
+  _applyforces!(T, vel, centers, weights, widths, strengths, forcefunc, theta2)
 end
 
 
@@ -203,4 +196,12 @@ end
 
 function Base.show(io::IO, z::InitializedManyBodyForce)
   print(io, "ManyBodyForce")
+  println(io)
+  print(io, "  with strength ", z.strengths)
+  println(io)
+  print(io, "  with min_distance2 ", z.min_distance2)
+  println(io)
+  print(io, "  with max_distance2 ", z.max_distance2)
+  println(io)
+  print(io, "  with theta2 ", z.theta2)
 end 

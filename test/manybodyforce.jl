@@ -55,7 +55,7 @@ function test_simpleforces(npts, approxfun, rtol; kwargs...)
 end
 
 @testset "simpleforces" begin
-  @test test_simpleforces(100, approxforces, 1e-1)
-  @test test_simpleforces(250, approxforces, 1e-1)
-  @test test_simpleforces(500, approxforces, 1e-1)
+  @test test_simpleforces(100, approxforces, 0.025)
+  @test test_simpleforces(250, approxforces, 0.025)
+  @test test_simpleforces(500, approxforces, 0.025)
 end
