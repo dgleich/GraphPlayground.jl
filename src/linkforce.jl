@@ -49,10 +49,14 @@ function initialize(link::LinkForce, nodes;
 
     if strength === nothing 
       strength = _handle_link_values(edges, (i,e,src,dst) -> 1.0 / min(count[src], count[dst]))
+    else
+      strength = _handle_link_values(edges, strength)
     end
 
     if bias === nothing 
       bias = _handle_link_values(edges, (i,e,src,dst) -> count[src] / (count[src] + count[dst]))
+    else 
+      bias = _handle_link_values(edges, bias)
     end
   else
     strength = _handle_link_values(edges, strength)
