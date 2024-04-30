@@ -147,3 +147,43 @@ end
 function CoolingStepper(; alpha=1.0, alpha_min=0.001, alpha_decay=1 - alpha_min^(1/300), alpha_target=0.0)
   return CoolingStepper(alpha, alpha_min, alpha_decay, alpha_target)
 end
+
+
+
+function _handle_node_values(nodes, x::Function)
+  return map(x, nodes)
+end
+function _handle_node_values(nodes, x::Real)
+  return ConstArray(x, (length(nodes),))
+end 
+function _handle_node_values(nodes, x::Tuple)
+  return ConstArray(x, (length(nodes),))
+end 
+function _handle_node_values(nodes, x::Union{AbstractArray,Dict})
+  return x
+end
+
+
+function _handle_link_values(edges, f::Function)
+  return map(x -> f(x[1],x[2], _srcdst(x[2])...), enumerate(edges))
+end
+function _handle_link_values(edges, x::Real)
+  return range(x, x, length=length(edges))
+end
+function _handle_link_values(edges, x::Union{AbstractArray,Dict})
+  return x
+end
+
+
+import Base.getindex, Base.size 
+struct ConstArray{T,N} <: AbstractArray{T,N}
+  val::T
+  shape::NTuple{N,Int}
+end
+getindex(c::ConstArray, i::Int...) = c.val
+size(c::ConstArray) = c.shape 
+
+## Write a Base.show function for ConstArray
+function Base.show(io::IO, c::ConstArray)
+  print(io, "ConstArray of shape ", c.shape, " with value ", c.val)
+end

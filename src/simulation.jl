@@ -91,7 +91,7 @@ function Base.show(io::IO, z::ForceSimulation)
   end
 end 
 
-pointtype(z::ForceSimulation) = eltype(z)
+pointtype(z::ForceSimulation) = eltype(z.positions)
 _get_node_array(T::DataType, sim::ForceSimulation) = Vector{T}(undef, length(sim.nodes))
 _get_node_array(T::DataType, nodes) = Vector{T}(undef, length(nodes))
 

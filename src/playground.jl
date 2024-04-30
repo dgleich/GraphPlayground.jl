@@ -44,7 +44,11 @@ function igraphplot!(ax, g, sim; kwargs...)
 end 
 
 function playground(g;
-  initial_iterations = 10)
+  initial_iterations = 10,
+  link_options = NamedTuple(), 
+  center_options = NamedTuple(),
+  charge_options = NamedTuple(),
+)
   n = nv(g) 
   f = Figure()
   buta = Button(f[1, 1], label="Animate", tellwidth=false)
@@ -54,16 +58,15 @@ function playground(g;
   ax.limits = (0, 800, 0, 600)
   
   sim = ForceSimulation(Point2f, vertices(g); 
-    link=LinkForce(edges=edges(g)), 
+    link=LinkForce(;edges=edges(g), link_options...), 
     #center=CenterForce(Point2f(400, 300)),
-    center = PositionForce(target=Point2f(400, 300)),
-    charge=ManyBodyForce(),
+    center = PositionForce(;target=Point2f(400, 300), center_options),
+    charge=ManyBodyForce(;charge_options...),
     )
   for _ in 1:initial_iterations
     step!(sim)
   end
   
-
   p = igraphplot!(ax, g, sim)    
 
   p[:node_pos][] = sim.positions
@@ -79,7 +82,7 @@ function playground(g;
     if taskref[] === nothing
       taskref[] = @async begin
         while true
-          sleep(1 / 30)
+          sleep(1 / 60)
 
           step!(sim)
           p[:node_pos][] = sim.positions

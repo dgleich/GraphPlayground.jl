@@ -1,38 +1,4 @@
 
-function _handle_node_values(nodes, x::Function)
-  return map(x, nodes)
-end
-function _handle_node_values(nodes, x::Real)
-  return range(x, x, length(nodes))
-end 
-function _handle_node_values(nodes, x::Tuple)
-  return ConstArray(x, (length(nodes),))
-end 
-function _handle_node_values(nodes, x::Union{AbstractArray,Dict})
-  return x
-end
-
-
-function _handle_link_values(edges, f::Function)
-  return map(x -> f(x[1],x[2], _srcdst(x[2])...), enumerate(edges))
-end
-function _handle_link_values(edges, x::Real)
-  return range(x, x, length=length(edges))
-end
-function _handle_link_values(edges, x::Union{AbstractArray,Dict})
-  return x
-end
-
-
-import Base.getindex, Base.size 
-struct ConstArray{T,N} <: AbstractArray{T,N}
-  val::T
-  shape::NTuple{N,Int}
-end
-getindex(c::ConstArray, i::Int...) = c.val
-size(c::ConstArray) = c.shape 
-
-
 """
 `CenterForce` represents a centering adjustment in a force simulation. 
 it has two parameters: 
