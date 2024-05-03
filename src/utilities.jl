@@ -15,6 +15,16 @@ _eltype(x) = Base.eltype(x)
 _TupleOf{T} = Tuple{T,Vararg{T}}
 _eltype(::Union{_TupleOf{T}, Type{<:_TupleOf{T}}}) where {T} = T
 
+_zero(x) = Base.zero(x)
+# We need that ugly hack again.
+# The issue is that NTuple{N,T} can have N = 0, which is zero parameters. So then 
+# we have a method ambiguity/etc. problem, which is what we're trying to avoid.
+# So the _TupleOf type forces it to have _at least one_ Tuple parameter.
+# and a consistent type for the rest. 
+_TupleOfLen{T,N} = Tuple{T,Vararg{T,N}}
+#_zero(::Union{NTuple{N, T}, Type{NTuple{N, T}}}) where {N, T} = ntuple(i -> zero(T), Val(N))
+# The
+_zero(x::Union{_TupleOfLen{T,N}, Type{<:_TupleOfLen{T,N}}}) where {T,N} = ntuple(i -> zero(T), Val(N+1))
 
 
 """

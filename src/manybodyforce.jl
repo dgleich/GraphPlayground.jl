@@ -59,7 +59,7 @@ end
 =#
 
 function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, strengths, rect) 
-  center = 0 .* first(centers)
+  center = _zero(eltype(centers)) # handles Tuple types... 
   weight = zero(eltype(weights))
   CType = typeof(center)
   WType = typeof(weight)
@@ -97,16 +97,16 @@ end
 
 function _build_tree_info(T::KDTree, pts, strengths)
   n = length(T.nodes) 
-  centers = Vector{Point2f}(undef, n)
-  weights = Vector{Float32}(undef, n)
-  widths = Vector{Float32}(undef, n)
+  centers = Vector{eltype(pts)}(undef, n)
+  weights = Vector{eltype(strengths)}(undef, n)
+  widths = Vector{_eltype(eltype(pts))}(undef, n)
   # we need to do a post-order traversal
   
   _walk(T, n, 1, centers, weights, widths, strengths, T.hyper_rec)
   return centers, weights, widths 
 end 
 
-@inline function _compute_force(rng, pt1, pt2, strength::T, max_distance2::T, min_distance2::T, alpha::T) where {T <: Real} 
+@inline function _compute_force(rng, pt1, pt2, strength, max_distance2, min_distance2, alpha) where {T <: Real} 
   d = pt2 .- pt1
   d = jiggle(d, rng)
   d2 = dot(d, d)

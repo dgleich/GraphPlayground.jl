@@ -26,7 +26,7 @@ struct InitializedLinkForce
   strengths
   distances
   rng
-  niterations::Int
+  iterations::Int
 end
 
 function Base.show(io::IO, z::InitializedLinkForce)
@@ -39,7 +39,7 @@ function initialize(link::LinkForce, nodes;
   strength = nothing, 
   distance = 30.0,
   bias = nothing, 
-  niterations = 1,
+  iterations = 1,
   random = nothing)
   if strength === nothing || bias === nothing 
     # count degrees to initialize srength and bias
@@ -65,7 +65,7 @@ function initialize(link::LinkForce, nodes;
 
   distance = _handle_link_values(edges, distance)
 
-  return InitializedLinkForce(edges, bias, strength, distance, random, niterations)
+  return InitializedLinkForce(edges, bias, strength, distance, random, iterations)
 end
 
 function initialize(link::LinkForce, sim::ForceSimulation)
@@ -100,7 +100,7 @@ function linkforce!(alpha::Real, pos, vel, edges, biases, strengths, distances, 
 end
 
 function force!(alpha::Real, sim::ForceSimulation, link::InitializedLinkForce)
-  niter = link.niterations
+  iters = link.iterations
   pos = sim.positions
   vel = sim.velocities
   bias = link.biases
@@ -109,5 +109,5 @@ function force!(alpha::Real, sim::ForceSimulation, link::InitializedLinkForce)
   edges = link.edges
   rng = link.rng 
 
-  linkforce!(alpha, pos, vel, edges, bias, strengths, distances, rng, niter)
+  linkforce!(alpha, pos, vel, edges, bias, strengths, distances, rng, iters)
 end

@@ -9,7 +9,7 @@ using Graphs
 using NearestNeighbors
 
 ## import setindex from Base
-import Base.setindex, Base.eltype
+import Base.setindex, Base.eltype, Base.zero, Base.show 
 
 include("utilities.jl")
 include("simulation.jl")

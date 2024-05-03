@@ -54,8 +54,10 @@ end
 function simstep!(alpha, positions, velocities, forces, decay, fixed)
   for i in eachindex(positions)
     if fixed[i] == false
-      positions[i] = positions[i] .+ velocities[i]
       velocities[i] = velocities[i] .* decay
+      positions[i] = positions[i] .+ velocities[i]
+    else
+      velocities[i] = ntuple(i->0, length(velocities[i]))
     end 
   end
 end
