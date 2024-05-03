@@ -21,6 +21,8 @@ include("linkforce.jl")
 export LinkForce
 include("manybodyforce.jl")
 export ManyBodyForce
+include("collisionforce.jl")
+export CollisionForce
 
 include("playground.jl")
 export playground
