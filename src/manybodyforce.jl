@@ -106,7 +106,7 @@ function _build_tree_info(T::KDTree, pts, strengths)
   return centers, weights, widths 
 end 
 
-@inline function _compute_force(rng, pt1, pt2, strength, max_distance2, min_distance2, alpha) where {T <: Real} 
+@inline function _compute_force(rng, pt1, pt2, strength, max_distance2, min_distance2, alpha) 
   d = pt2 .- pt1
   d = jiggle(d, rng)
   d2 = dot(d, d)
