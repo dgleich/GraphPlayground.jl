@@ -119,6 +119,9 @@ function _collision_force_on_node(target, treenode, rect, targetpt, T, maxradii,
 
           vel[velidx] = vel[velidx] .+ d .* l .* factor 
           vel[origidx] = vel[origidx] .- d .* l .* (1-factor)
+          
+          #vel[velidx] = vel[velidx] .+ d .* l .* (1-factor)
+          #vel[origidx] = vel[origidx] .- d .* l .* (factor)
         end
       end
     end 
@@ -142,18 +145,46 @@ end
 function _apply_collsion_force(T, vel, maxradii, radii, strengths, rng)
   for i in eachindex(T.data)
     velidx = T.reordered == false ? i : T.indices[i]  # this is the index of i in the real vel array
-    _collision_force_on_node(i, 1, T.hyper_rec, T.data[i], T, maxradii, radii, strengths, rng, vel, velidx)
+
+    _collision_force_on_node(i, 1, T.hyper_rec, T.data[i] .+ vel[velidx], T, maxradii, radii, strengths, rng, vel, velidx)
   end 
 end
 
 
-function collisionforce!(alpha::Real, nodes, pos, vel, radii, strengths, rng)
-  T = KDTree(pos)
+function collisionforce!(niter::Int, alpha::Real, nodes, pos, vel, radii, strengths, rng)
+  T = KDTree(pos; reorder=true)
   # need to find the biggest radius in each quadtree node. 
   maxradius = _build_tree_info_maxradius(T, pos, radii)
-  _apply_collsion_force(T, vel, maxradius, radii, strengths, rng)
+  for _ in 1:niter
+    _apply_collsion_force(T, vel, maxradius, radii, strengths, rng)
+  end
 end
 
+#=
+function simplecollisionforce!(alpha::Real, nodes, pos, vel, radii, strengths, rng)
+  for i in eachindex(nodes)
+    targetpt = pos[i] .+ vel[i]
+    for j in eachindex(nodes)
+      if i > j 
+        ri = radii[i]
+        rj = radii[j]
+        r = ri + rj
+        d = targetpt .- pos[j] .- vel[j]
+        d2 = dot(d,d)
+        if d2 < r*r
+          d = jiggle(d, rng)
+          d2 = dot(d,d)
+          dval = sqrt(d2)
+          l = (r-dval) / dval
+          factor = (rj*rj)/(ri*ri + rj*rj) 
+          vel[i] = vel[i] .+ d .* l .* (factor)
+          vel[j] = vel[j] .- d .* l .* (1-factor)
+        end
+      end
+    end
+  end
+end 
+=#
 
 function force!(alpha::Real, sim::ForceSimulation, many::InitializedCollisionForce)
   pos = sim.positions
@@ -164,6 +195,6 @@ function force!(alpha::Real, sim::ForceSimulation, many::InitializedCollisionFor
   strengths = many.strength
   rng = many.rng
 
-  collisionforce!(alpha, nodes, pos, vel, radii, strengths, rng)
+  collisionforce!(many.iterations, alpha, nodes, pos, vel, radii, strengths, rng)
 end
 
