@@ -146,7 +146,7 @@ end
 function step!(stepper::CoolingStepper)
   # convert this code 
   #  alpha += (alphaTarget - alpha) * alphaDecay;  
-  if (stepper.alpha <= stepper.alpha_min)
+  if (stepper.alpha <= stepper.alpha_min) && stepper.alpha_target < stepper.alpha
     return zero(typeof(stepper.alpha))
   else 
     stepper.alpha += (stepper.alpha_target - stepper.alpha) * stepper.alpha_decay
