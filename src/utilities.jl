@@ -197,3 +197,36 @@ size(c::ConstArray) = c.shape
 function Base.show(io::IO, c::ConstArray)
   print(io, "ConstArray of shape ", c.shape, " with value ", c.val)
 end
+
+function taskloop(loop::Function; delay=1/60)
+  t0 = time()
+  taskref = Ref{Union{Nothing,Task}}(nothing)
+  should_close = Ref(false)
+  taskref[] = @async begin
+    while true
+      sleep(delay)
+      if loop(time() - t0) == false
+        should_close[] = true 
+      end
+      should_close[] && break
+    end
+    should_close[] = false
+  end 
+  push!(_tasklist, (taskref, should_close))
+  return taskref, should_close
+end 
+
+_tasklist = [] 
+
+function cleanup_tasks()
+  for (taskref, should_close) in _tasklist
+    if !(taskref[] === nothing)
+      if !istaskdone(taskref[])
+        should_close[] = true 
+      end
+      wait(taskref[])
+    end 
+  end
+  empty!(_tasklist)
+  return nothing 
+end 
