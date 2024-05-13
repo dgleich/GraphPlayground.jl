@@ -160,31 +160,33 @@ function collisionforce!(niter::Int, alpha::Real, nodes, pos, vel, radii, streng
   end
 end
 
-#=
-function simplecollisionforce!(alpha::Real, nodes, pos, vel, radii, strengths, rng)
-  for i in eachindex(nodes)
-    targetpt = pos[i] .+ vel[i]
-    for j in eachindex(nodes)
-      if i > j 
-        ri = radii[i]
-        rj = radii[j]
-        r = ri + rj
-        d = targetpt .- pos[j] .- vel[j]
-        d2 = dot(d,d)
-        if d2 < r*r
-          d = jiggle(d, rng)
+
+function simplecollisionforce!(niter::Int, alpha::Real, nodes, pos, vel, radii, strengths, rng)
+  for _ in 1:niter
+    for i in eachindex(nodes)
+      targetpt = pos[i] .+ vel[i]
+      for j in eachindex(nodes)
+        if i > j 
+          ri = radii[i]
+          rj = radii[j]
+          r = ri + rj
+          d = targetpt .- pos[j] .- vel[j]
           d2 = dot(d,d)
-          dval = sqrt(d2)
-          l = (r-dval) / dval
-          factor = (rj*rj)/(ri*ri + rj*rj) 
-          vel[i] = vel[i] .+ d .* l .* (factor)
-          vel[j] = vel[j] .- d .* l .* (1-factor)
+          if d2 < r*r
+            d = jiggle(d, rng)
+            d2 = dot(d,d)
+            dval = sqrt(d2)
+            l = (r-dval) / dval
+            factor = (rj*rj)/(ri*ri + rj*rj) 
+            vel[i] = vel[i] .+ d .* l .* (factor)
+            vel[j] = vel[j] .- d .* l .* (1-factor)
+          end
         end
       end
     end
   end
 end 
-=#
+
 
 function force!(alpha::Real, sim::ForceSimulation, many::InitializedCollisionForce)
   pos = sim.positions
@@ -196,5 +198,6 @@ function force!(alpha::Real, sim::ForceSimulation, many::InitializedCollisionFor
   rng = many.rng
 
   collisionforce!(many.iterations, alpha, nodes, pos, vel, radii, strengths, rng)
+  #simplecollisionforce!(many.iterations, alpha, nodes, pos, vel, radii, strengths, rng)
 end
 
