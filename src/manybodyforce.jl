@@ -63,18 +63,20 @@ function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, strengths,
   weight = zero(eltype(weights))
   CType = typeof(center)
   WType = typeof(weight)
+  FType = _eltype(eltype(centers))
   if NearestNeighbors.isleaf(n, idx)
     idxmap = T.indices
     treepts = T.data 
-    npts = 0 
+    totalmass = zero(FType)
     for ptsidx in NearestNeighbors.get_leaf_range(T.tree_data, idx)
-      npts += 1
       Tidx = T.reordered ? ptsidx : idxmap[ptsidx]
       origidx = T.reordered == false ? ptsidx : idxmap[ptsidx] 
-      center = center .+ treepts[Tidx]
+      q = FType(abs(strengths[origidx]))
+      totalmass += q
+      center = center .+ q*treepts[Tidx]
       weight += strengths[origidx] 
     end 
-    center = center ./ npts
+    center = center ./ totalmass
     return (center::CType, weight::WType)
   else 
     left, right = NearestNeighbors.getleft(idx), NearestNeighbors.getright(idx)
@@ -180,6 +182,21 @@ function manybodyforce!(alpha::Real, nodes, pos, vel, strengths, min_distance2, 
   _applyforces!(T, vel, centers, weights, widths, strengths, forcefunc, theta2)
 end
 
+function simpleforces!(alpha::Real, nodes, pts, vel, strengths, min_distance2, max_distance2, theta2, rng)
+  forcefunc = @inline (u, v, strength) -> _compute_force(rng, u, v, strength, max_distance2, min_distance2, Float32(alpha))
+  for i in eachindex(pts)
+    targetpt = pts[i]
+    f = 0.0 .* targetpt 
+    
+    for j in eachindex(pts)
+      if i != j
+        f = f .+ forcefunc(targetpt, pts[j], strengths[j])
+      end 
+    end
+    vel[i] = vel[i] .+ f
+  end 
+end
+
 
 function force!(alpha::Real, sim::ForceSimulation, many::InitializedManyBodyForce)
   pos = sim.positions
@@ -192,6 +209,7 @@ function force!(alpha::Real, sim::ForceSimulation, many::InitializedManyBodyForc
   rng = many.rng 
 
   manybodyforce!(alpha, nodes, pos, vel, strengths, min_distance2, max_distance2, theta2, rng)
+  #simpleforces!(alpha, nodes, pos, vel, strengths, min_distance2, max_distance2, theta2, rng)
 end
 
 function Base.show(io::IO, z::InitializedManyBodyForce)
