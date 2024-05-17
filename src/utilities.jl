@@ -198,6 +198,24 @@ function Base.show(io::IO, c::ConstArray)
   print(io, "ConstArray of shape ", c.shape, " with value ", c.val)
 end
 
+function updateloop(loop, scene)
+  screen = Makie.getscreen(scene)
+  task, close = taskloop(loop; delay = 1/screen.config.framerate)
+  #= waittask = @async begin 
+    wait(screen) 
+    close[] = true
+    wait(task[])
+  end =#
+  on(screen.window_open) do x
+    if x == false
+      println("Got false from window_open")
+      close[] = true
+      wait(task[])
+    end
+  end 
+  return task, close
+end 
+
 function taskloop(loop::Function; delay=1/60)
   t0 = time()
   taskref = Ref{Union{Nothing,Task}}(nothing)
@@ -212,7 +230,13 @@ function taskloop(loop::Function; delay=1/60)
     end
     should_close[] = false
   end 
-  push!(_tasklist, (taskref, should_close))
+  #schedule(taskref[])
+  yield()
+  if istaskfailed(taskref[])
+    rethrow(taskref[])
+  else 
+    push!(_tasklist, (taskref, should_close))
+  end 
   return taskref, should_close
 end 
 
