@@ -232,11 +232,13 @@ function taskloop(loop::Function; delay=1/60)
   end 
   #schedule(taskref[])
   yield()
-  if istaskfailed(taskref[])
-    rethrow(taskref[])
-  else 
-    push!(_tasklist, (taskref, should_close))
-  end 
+  if !(taskref[] === nothing)
+    if istaskfailed(taskref[])
+      rethrow(taskref[])
+    else 
+      push!(_tasklist, (taskref, should_close))
+    end 
+  end
   return taskref, should_close
 end 
 
