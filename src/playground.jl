@@ -1,12 +1,13 @@
 
 function igraphplot!(ax, g, sim; kwargs...)
-  p = graphplot!(ax, g, edge_width = [2.0 for i in 1:ne(g)],
+  p = graphplot!(ax, g; 
+              edge_width = [2.0 for i in 1:ne(g)],
               edge_color = [colorant"gray" for i in 1:ne(g)],
               node_size = [10 for i in 1:nv(g)],
               node_color = [colorant"black" for i in 1:nv(g)], 
               layout = sim.positions, 
               kwargs...)
-
+  
   hidedecorations!(ax); hidespines!(ax)
   ax.aspect = DataAspect()
   deregister_interaction!(ax, :rectanglezoom)
@@ -49,6 +50,7 @@ end
 
 function playground(g, sim::ForceSimulation; 
   initial_iterations = 10,
+  graphplot_options = NamedTuple(),
   kwargs...)
   n = nv(g) 
   f = Figure()
@@ -62,8 +64,7 @@ function playground(g, sim::ForceSimulation;
     step!(sim)
   end
   
-  
-  p = igraphplot!(ax, g, sim)    
+  p = igraphplot!(ax, g, sim; graphplot_options...)    
 
   p[:node_pos][] = sim.positions
   
