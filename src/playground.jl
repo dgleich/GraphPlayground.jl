@@ -28,7 +28,11 @@ function igraphplot!(ax, g, sim; kwargs...)
   function node_drag_action(state, idx, event, axis)
     if state == false
       # this means it's the end of the drag
-      freenode!(sim, idx)
+      if Keyboard.left_shift in events(axis).keyboardstate
+        # then we want to leave the node as fixed...
+      else 
+        freenode!(sim, idx)
+      end 
       sim.alpha.alpha_target = 0.001
     else 
       fixnode!(sim, idx, event.data)
