@@ -24,6 +24,7 @@ end=#
   include("linkforce.jl")
   include("manybodyforce.jl")
   include("positionforce.jl")
+  include("d3-compare.jl")
 
   @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(GraphPlayground;
