@@ -54,12 +54,15 @@ function playground(g, sim::ForceSimulation;
   kwargs...)
   n = nv(g) 
   f = Figure()
-  buta = Button(f[1, 1], label="Animate", tellwidth=false)
-  buts = Button(f[1, 2], label="Stop", tellwidth=false)
-  butr = Button(f[1, 3], label="Reheat", tellwidth=false)
+  button_startstop = Button(f[1, 1], label="Animate", tellwidth=false)
+  button_stop = Button(f[1, 2], label="Stop", tellwidth=false)
+  button_reheat = Button(f[1, 3], label="Reheat", tellwidth=false)
+  button_help = Button(f[1, 4], label="Show Help", tellwidth=false)
   ax = Axis(f[2, :])
   ax.limits = (0, 800, 0, 600)
-  
+
+  status = Label(f[3,:], text=" ", tellwidth=false)
+
   for _ in 1:initial_iterations
     step!(sim)
   end
@@ -71,11 +74,11 @@ function playground(g, sim::ForceSimulation;
   taskref = Ref{Union{Nothing,Task}}(nothing)
   should_close = Ref(false)
 
-  on(butr.clicks) do _
+  on(button_reheat.clicks) do _
     sim.alpha.alpha = min(sim.alpha.alpha * 10, 1.0)
   end
 
-  on(buta.clicks) do _
+  on(button_startstop.clicks) do _
     if taskref[] === nothing
       taskref[] = @async begin
         while true
@@ -92,7 +95,7 @@ function playground(g, sim::ForceSimulation;
     Consume(true)
   end
 
-  on(buts.clicks) do _
+  on(button_stop.clicks) do _
     if taskref[] !== nothing && !should_close[]
       should_close[] = true
       wait(taskref[])
@@ -101,20 +104,27 @@ function playground(g, sim::ForceSimulation;
     end
     Consume(true)
   end
+
+  on(button_help.clicks) do _
+    #println("Help")
+    status.text[] = "Drag to move nodes, reheat to restart the animation, hold Shift while dragging to fix a node"
+    Consume(true)
+  end
   f
 end
 
 function playground(g;
-  link_options = NamedTuple(), 
+  link_options = (;iterations=1,distance=30), 
   center_options = NamedTuple(),
   charge_options = NamedTuple(),
   kwargs...
 )
   sim = ForceSimulation(Point2f, vertices(g); 
     link=LinkForce(;edges=edges(g), link_options...), 
+    #collide=CollisionForce(;radius=10),
     #center=CenterForce(Point2f(400, 300)),
-    center = PositionForce(;target=Point2f(400, 300), center_options),
     charge=ManyBodyForce(;charge_options...),
+    center=PositionForce(;target=Point2f(400, 300), center_options),
     )
   playground(g, sim; kwargs...)
 end
