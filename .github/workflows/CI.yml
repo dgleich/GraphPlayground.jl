@@ -62,7 +62,7 @@ jobs:
           version: '1.10'
       - uses: julia-actions/cache@v2
       - name: Configure doc environment
-        shell: julia --project=docs --color=yes {0}
+        shell: DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24' julia --project=docs --color=yes {0}
         run: |
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
         with:
-          prefix: xvfb-run 
+          prefix: DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24'
       - name: Run doctests
         shell: xvfb-run -s '-screen 0 1024x768x24' julia --project=docs --color=yes {0}
         run: |
