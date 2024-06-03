@@ -13,14 +13,14 @@ function igraphplot!(ax, g, sim; kwargs...)
   deregister_interaction!(ax, :rectanglezoom)
   
   function node_hover_action(state, idx, event, axis)
-    p.node_size[][idx] = state ? 20 : 10
+    p.node_size[][idx] = state ? p.node_size[][idx]*2 : p.node_size[][idx]/2
     p.node_size[] = p.node_size[] # trigger observable
   end
   nhover = NodeHoverHandler(node_hover_action)
   register_interaction!(ax, :nhover, nhover)
 
   function edge_hover_action(state, idx, event, axis)
-    p.edge_width[][idx]= state ? 5.0 : 2.0
+    p.edge_width[][idx]= state ? p.edge_width[][idx]*4 : p.edge_width[][idx]/4
     p.edge_width[] = p.edge_width[] # trigger observable
   end
   ehover = EdgeHoverHandler(edge_hover_action)
