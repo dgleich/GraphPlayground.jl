@@ -52,7 +52,7 @@ function playground(g, sim::ForceSimulation;
   initial_iterations = 10,
   graphplot_options = NamedTuple(),
   labels = map(i->string(i), 1:nv(g)),
-  verbose = true, 
+  verbose = false, 
   kwargs...)
 
   f = Figure()
