@@ -4,6 +4,7 @@ using Aqua
 using JET
 using StableRNGs
 using GeometryBasics
+using Graphs
 
 ##
 #=@testset "dev" begin
