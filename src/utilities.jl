@@ -256,3 +256,48 @@ function cleanup_tasks()
   empty!(_tasklist)
   return nothing 
 end 
+
+"""
+    Window(loop::Function, scene; [title="GraphPlayground", size=(800,800), kwargs...])
+
+Create a window based on a scene. The window will run the provided `loop` function ever
+frame. The loop function should take a single argument, which is the time since the window
+was opened. This function is a fairly thin wrapper around GLMakie.Screen and GLMakie.display_scene!,
+but makes it easier to abstract in the future. 
+
+## Parameters 
+  - `loop`: A function that will be called every frame. 
+    The function should take a single argument, 
+    which is the time since the window was opened.
+  - `scene`: The scene to display in the window.
+  - `title`: The title of the window. Default is "GraphPlayground".
+  - `size`: The size of the window. Default is (800,800).
+  - `kwargs`: Additional keyword arguments to pass to the GLMakie.Screen constructor.
+
+## Example
+This example shows a bunch of points that are going to be pushed away from each other
+in a simulation of a collision. 
+```julia 
+using GeometryBasics, GraphPlayground, GLMakie
+scenesize = 500 
+n = 100
+scene = Scene(camera=campixel!, size=(scenesize, scenesize))
+pts = Observable((scenesize/2*rand(Point2f0, n)) .+ (scenesize/4)*Point2f(1,1))
+radius = rand(10:20, n)
+sim = ForceSimulation(pts[], eachindex(pts[]);
+  collide = CollisionForce(radius=radius .+ 2, iterations=3))
+scatter!(scene, pts, markersize=pi*radius/1.11)
+GraphPlayground.Window(scene; 
+  title="Collision Simulation", size=(scenesize, scenesize),
+  focus_on_show = true) do _ 
+  step!(sim)
+  pts[] = sim.positions
+end 
+```  
+"""    
+function Window(loop::Function, scene; title="GraphPlayground", size=(800,800), kwargs...)
+  screen = GLMakie.Screen(framerate=60.0, vsync=true, render_on_demand=false, title=title; kwargs...)
+  GLMakie.display_scene!(screen, scene)
+  on(loop, screen.render_tick)
+  return screen
+end

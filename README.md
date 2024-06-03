@@ -19,3 +19,20 @@ playground(g)
 ```
 
 This opens an interactive window that will visualize the graph. 
+
+
+Requirements
+------------
+- `GLMakie`: This is required to implement a window with a callback on each frame. 
+- `GraphMakie`: This is required for the basic plotting code
+- `NearestNeighbors`: This is required for the balltree to implement the distant cell
+  approximation in the ManyBodyForce and CollisionForce
+- `Graphs`: This is what we use to interact with GraphMakie
+- `Colors`: I guess we need this to specify plot colors
+- `Makie`: Just general Makie code as well. 
+
+Standard libraries
+------------------
+- `Random`: We use random data. 
+- `LinearAlgebra`: This is used for norms and dot products. 
+
