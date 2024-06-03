@@ -57,12 +57,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1.10'
+          arch: x64
       - uses: julia-actions/cache@v2
       - name: Configure doc environment
-        shell: DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24' julia --project=docs --color=yes {0}
+        shell: xvfb-run -a julia --project=docs --color=yes {0}
         run: |
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
@@ -73,9 +75,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
         with:
-          prefix: DISPLAY=:0 xvfb-run -s '-screen 0 1024x768x24'
+          prefix: xvfb-run -a 
       - name: Run doctests
-        shell: xvfb-run -s '-screen 0 1024x768x24' julia --project=docs --color=yes {0}
+        shell: xvfb-run -a  julia --project=docs --color=yes {0}
         run: |
           using Documenter: DocMeta, doctest
           using GraphPlayground
