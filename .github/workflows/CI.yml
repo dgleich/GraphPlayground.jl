@@ -74,6 +74,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+        with:
+          prefix: xvfb-run
       - name: Run doctests
         shell: xvfb-run -a  julia --project=docs --color=yes {0}
         run: |
