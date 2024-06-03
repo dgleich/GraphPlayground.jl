@@ -62,7 +62,7 @@ jobs:
           version: '1.10'
       - uses: julia-actions/cache@v2
       - name: Configure doc environment
-        shell: xvfb-run -s '-screen 0 1024x768x24' julia --project=docs --color=yes {0}
+        shell: julia --project=docs --color=yes {0}
         run: |
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
