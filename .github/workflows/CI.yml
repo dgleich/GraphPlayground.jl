@@ -71,6 +71,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+        with:
+          prefix: xvfb-run -s '-screen 0 1024x768x24'
       - name: Run doctests
         shell: julia --project=docs --color=yes {0}
         run: |
@@ -78,3 +80,5 @@ jobs:
           using GraphPlayground
           DocMeta.setdocmeta!(GraphPlayground, :DocTestSetup, :(using GraphPlayground); recursive=true)
           doctest(GraphPlayground)
+        with:
+          prefix: xvfb-run -s '-screen 0 1024x768x24'
