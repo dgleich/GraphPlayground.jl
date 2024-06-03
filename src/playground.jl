@@ -51,17 +51,21 @@ end
 function playground(g, sim::ForceSimulation; 
   initial_iterations = 10,
   graphplot_options = NamedTuple(),
+  labels = map(i->string(i), 1:nv(g)),
+  verbose = true, 
   kwargs...)
-  n = nv(g) 
+
   f = Figure()
   button_startstop = Button(f[1, 1], label="Animate", tellwidth=false)
-  button_stop = Button(f[1, 2], label="Stop", tellwidth=false)
   button_reheat = Button(f[1, 3], label="Reheat", tellwidth=false)
   button_help = Button(f[1, 4], label="Show Help", tellwidth=false)
   ax = Axis(f[2, :])
   ax.limits = (0, 800, 0, 600)
 
-  status = Label(f[3,:], text=" ", tellwidth=false)
+  txt = text!(ax, (0, 0), text="")
+
+  status = Label(f[3,:], text="", tellwidth=false,
+    tellheight=true, height=1)
 
   for _ in 1:initial_iterations
     step!(sim)
@@ -69,49 +73,68 @@ function playground(g, sim::ForceSimulation;
   
   p = igraphplot!(ax, g, sim; graphplot_options...)    
 
-  p[:node_pos][] = sim.positions
-  
-  taskref = Ref{Union{Nothing,Task}}(nothing)
-  should_close = Ref(false)
+  function node_hover_action_label(state, idx, event, axis)
+    status.text[] = state ? "Node $(labels[idx])" : ""
+  end
+  register_interaction!(ax, :nhover_label, NodeHoverHandler(node_hover_action_label))
 
+  edgelist = collect(edges(g))
+
+  function edge_hover_action_label(state, idx, event, axis)
+    edge = edgelist[idx]
+    status.text[] = state ? "Edge $(labels[edge.src]) -- $(labels[edge.dst])" : ""
+  end
+  register_interaction!(ax, :ehover_label, EdgeHoverHandler(edge_hover_action_label))
+
+  p[:node_pos][] = sim.positions
+  run_updates = Ref(false)
+  
   on(button_reheat.clicks) do _
     sim.alpha.alpha = min(sim.alpha.alpha * 10, 1.0)
   end
 
   on(button_startstop.clicks) do _
-    if taskref[] === nothing
-      taskref[] = @async begin
-        while true
-          sleep(1 / 60)
-
-          step!(sim)
-          p[:node_pos][] = sim.positions
-
-          should_close[] && break
-        end
-        should_close[] = false
-      end
-    end
+    if button_startstop.label[] == "Animate"
+      run_updates[] = true 
+      button_startstop.label[] = "Stop Updates"
+    else
+      run_updates[] = false
+      button_startstop.label[] = "Animate"
+    end 
     Consume(true)
   end
 
-  on(button_stop.clicks) do _
-    if taskref[] !== nothing && !should_close[]
-      should_close[] = true
-      wait(taskref[])
-      taskref[] = nothing
-      #set_close_to!(sl, 0)
-    end
-    Consume(true)
-  end
-
+  
   on(button_help.clicks) do _
     #println("Help")
     status.text[] = "Drag to move nodes, reheat to restart the animation, hold Shift while dragging to fix a node"
     Consume(true)
   end
-  f
+
+  w = Window(f.scene, focus_on_show=true, framerate=60.0, 
+    vsync=true, render_on_demand=false, title="GLMakie Graph Playground") do _
+    if run_updates[] == true 
+      step!(sim)
+      p[:node_pos][] = sim.positions
+      if verbose 
+        txt.text[] = "alpha $(sim.alpha.alpha)"
+      end 
+    end 
+  end 
+
+  return Playground(w, sim, ax)
 end
+
+struct Playground{WindowType,SimType,AxisType}
+  window::WindowType
+  sim::SimType
+  axis::AxisType
+end
+
+import Base.display
+display(p::Playground) = display(p.window)
+
+
 
 function playground(g;
   link_options = (;iterations=1,distance=30), 
