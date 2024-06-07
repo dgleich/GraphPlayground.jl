@@ -52,8 +52,7 @@ function playground(g, sim::ForceSimulation;
   initial_iterations = 10,
   graphplot_options = NamedTuple(),
   labels = map(i->string(i), 1:nv(g)),
-  verbose = false, 
-  kwargs...)
+  verbose = false)
 
   f = Figure()
   button_startstop = Button(f[1, 1], label="Animate", tellwidth=false)
@@ -133,9 +132,56 @@ end
 
 import Base.display
 display(p::Playground) = display(p.window)
+import Base.show 
+show(io::IO, p::Playground) = println(io, "Playground with window ", p.window, " and simulation ", p.sim)
 
 
+"""
+    playground(g; 
+      [link_options = (;iterations=1,distance=30),] 
+      [center_options = NamedTuple(),]
+      [charge_options = NamedTuple(),]
+      [graphplot_options = NamedTuple(),]
+      [initial_iterations = 10,]
+      [labels = map(i->string(i), 1:nv(g)),]
+      [verbose = false,]
+      [kwargs...] )
+    playground(g, sim; kwargs...)
 
+Create a graph playground window from the graph `g`.
+
+The value that is returned is a `Playground` object, which is a thin 
+wrapper around the window, the simulation, and the Makie axis.
+
+## Optional parameters
+- `link_options`: These options are passed to the `LinkForce`` constructor. 
+  The default is `(;iterations=1,distance=30)`. This is generally good.
+  For grid graphs, set iterations higher to get a better layout.
+- `center_options`: These options are passed to the `PositionForce` constructor.
+- `charge_options`: These options are passed to the `ManyBodyForce` constructor.
+- `graphplot_options`: These options are passed to the `graphplot!` function.
+- `initial_iterations`: The number of layout iteration to run before the first display.
+  The default is 10. 
+- `labels`: A list of strings to display for the node identifiers. By default these 
+  are the numeric node ids
+- `verbose`: If true, additional information is shown in the lower left corner of the plot.
+
+## Examples
+```julia
+g = wheel_graph(10)
+playground(g)
+```
+
+For a grid, this often looks much better
+```julia
+g = grid([10,10])
+playground(g; 
+  link_options=(;iterations=10, strength=1, distance=20))
+```
+
+## See also
+[`ForceSimulation`](@ref), [`LinkForce`](@ref), [`ManyBodyForce`](@ref), [`PositionForce`](@ref)
+"""
 function playground(g;
   link_options = (;iterations=1,distance=30), 
   center_options = NamedTuple(),
@@ -144,8 +190,6 @@ function playground(g;
 )
   sim = ForceSimulation(Point2f, vertices(g); 
     link=LinkForce(;edges=edges(g), link_options...), 
-    #collide=CollisionForce(;radius=10),
-    #center=CenterForce(Point2f(400, 300)),
     charge=ManyBodyForce(;charge_options...),
     center=PositionForce(;target=Point2f(400, 300), center_options),
     )

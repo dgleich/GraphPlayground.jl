@@ -12,14 +12,22 @@ package to Julia to handle the force directed layout.
 
 Usage
 -----
+Using it should be as simple as giving the graph (right now, this has to be a graph from `Graphs.jl`) you want to play with to the playground function. 
 ```
 using Graphs, GraphPlayground
-g = grid([10,10]) # make a 10x10 grid from Graphs
+g = smallgraph(:karate))
 playground(g)
 ```
 This should open an interactive window that will visualize the graph. 
 
+But for such a small graph, I find the following looks better. 
+```
+playground(g; 
+  link_options=(;distance=25), 
+  charge_options=(;strength=-100))
+```
 
+Unfortunately, tweaking the options is a real thing with this package. Future plans include slightly better automated choices. 
 
 Grids or very highly spatial graphs require a little bit more fussing.
 ```
@@ -55,6 +63,17 @@ of the parameters.
 - [https://d3js.org/d3-force/link]
 - [https://d3js.org/d3-force/many-body]
 - [https://d3js.org/d3-force/position]
+
+To get the positions of the nodes, just call
+
+```
+p = playground(g)
+xy = p.sim.positions 
+```
+
+This will return an array of node positions. 
+
+See 
 
 Important Note
 --------------

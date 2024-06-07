@@ -8,6 +8,7 @@ using LinearAlgebra
 using Graphs
 using NearestNeighbors
 using GLMakie 
+using GeometryBasics
 
 ## import setindex from Base
 import Base.setindex, Base.eltype, Base.zero, Base.show 
