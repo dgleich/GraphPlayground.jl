@@ -167,11 +167,24 @@ function step!(sim::ForceSimulation, n)
   return sim
 end
 
+
+"""
+    fixnode!(sim::ForceSimulation, i, pos)
+
+Fix the position of a node in the simulation. This will prevent the node from moving.
+This importantly keeps the velocity of the node set to 0, which will prevent the node
+from updating other implicit positions. 
+"""
 function fixnode!(sim::ForceSimulation, i, pos)
   sim.fixed[i] = true
   sim.positions[i] = pos
 end
 
+"""
+    freenode!(sim::ForceSimulation, i)
+
+Remove the fixed position of a node in the simulation. This will allow the node to move.    
+"""    
 function freenode!(sim::ForceSimulation, i)
   sim.fixed[i] = false
 end

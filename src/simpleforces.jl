@@ -1,4 +1,11 @@
 
+struct CenterForce{T, V <: Real}
+  center::T
+  strength::V
+  args::@NamedTuple{}
+end
+
+
 """
 `CenterForce` represents a centering adjustment in a force simulation. 
 it has two parameters: 
@@ -12,9 +19,7 @@ positions of the nodes in the simulation instead of updating their velocities.
 Use PositionForce to apply a force to the velocities of the nodes instead. 
 (Also, please don't combine PositionForce and CenterForce.)
 
-Examples:
----------
-n = 
+## Example
 rad = 10*rand(100)
 sim = ForceSimulation(Point2f, eachindex(rad);
     center=CenterForce(center, strength=1.0),
@@ -24,13 +29,12 @@ p = scatter(sim.positions, markersize=rad)
 for i in 1:100
     step!(sim)
     p[:node_pos][] = sim.positions
+    sleep(0.5)
 end    
+
+## See also
+[`ForceSimulation`](@ref)
 """    
-struct CenterForce{T, V <: Real}
-  center::T
-  strength::V
-  args::@NamedTuple{}
-end 
 CenterForce(center) = CenterForce(center, 1.0, NamedTuple())
 CenterForce(center, strength) = CenterForce(center, strength, NamedTuple())
 CenterForce(;center, strength) = CenterForce(center, strength, NamedTuple()) 
@@ -64,6 +68,20 @@ end
 function Base.show(io::IO, z::CenterForce)
   print(io, "CenterForce with center ", z.center, " and strength ", z.strength)
 end 
+
+"""
+    PositionForce(;[target] [, strength])
+
+`PositionForce` represents a force that directly adjusts the velocities of the nodes in a force simulation.
+
+## Arguments 
+- `target`: The target position of each nodes. This can be a single value or an array of values. 
+  The default is (0,0), which tries to center the positions 
+- `strength`: The strength of the force, which is a real number. The default is 0.1.
+
+## See also 
+[`ForceSimulation`](@ref)
+"""    
 
 struct PositionForce{T}
   args::T

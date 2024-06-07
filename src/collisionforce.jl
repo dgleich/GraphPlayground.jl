@@ -1,12 +1,13 @@
-"""
-    CollisionForce([radius, strength])
-    
-"""
-
 struct CollisionForce{T}
   args::T 
 end 
 
+
+"""
+    CollisionForce([radius,] [strength])
+
+Create a collision force. This force is used to simulate collisions between nodes.
+"""
 CollisionForce(;kwargs...) = CollisionForce{typeof(kwargs)}(kwargs)
 #CollisionForce() = CollisionForce(NamedTuple())
 
