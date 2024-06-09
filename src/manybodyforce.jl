@@ -1,13 +1,36 @@
 """
-ManyBodyForce()
-ManyBodyForce(strength=-50)
-ManyBodyForce(edges; strength=(src,dst)->val[src]*val[dst], distance, rng)
+    ManyBodyForce()
+    ManyBodyForce(; [strength], [min_distance2], [max_distance2], [theta2], [random])
 
-- strength - the repulsive strength to use, defaults to -30
-- rng - the random number generator to jiggle close points 
-- min_distance2 - where to lower-bound force application 
-- max_distance2 - where to cutoff force application 
-- theta2 - where to apply the quadtree approximation 
+Create a force defined by multiple bodies. 
+This force is used to simulate the repulsion or attraction
+between nodes of the simulation. If you wish to apply to only 
+a subset of nodes, you can set the `strength` to zero for the
+nodes you wish to ignore. 
+
+This computation is implemented with a space partitioning data structure
+(current a KDTree) to approximate the impact of distance forces
+using a far-field approximation (this is often called a 
+Barnes-Hut approximation, but that doesn't help understand what
+is going on). Setting `theta2` to zero will cause it to 
+discard the approximation and compute the exact force. 
+Reasonable values for `theta2` are between 0.5 (better approximation) 
+and 1.5 (poor approximation). (This is the square of the ``\\theta``
+value commonly used in Barnes-Hut approximations.)
+
+## Arguments
+- `strength`: A constant, a function or array of values.
+  The repulsive strength to use, defaults to -30, 
+  which is a repulsive force between nodes. 
+- `min_distance2`: A constant, that defines a minimum distance
+  between nodes. If the distance between two nodes is less than
+  this value, the force is increased a bit. The default is 1.0.
+- `max_distance2`: A constant, that defines a maximum distance
+  between nodes. If the distance between two nodes is greater than
+  this value, the force is ignored. The default is Inf.
+- `theta2`: A constant, that defines the accuracy of the approximation.
+  The default is 0.81, which is a reasonable value for most simulations.
+- `random`: A random number generator. This is used for the random perturbations.      
 """
 struct ManyBodyForce{T}
   args::T 
@@ -196,7 +219,6 @@ function simpleforces!(alpha::Real, nodes, pts, vel, strengths, min_distance2, m
     vel[i] = vel[i] .+ f
   end 
 end
-
 
 function force!(alpha::Real, sim::ForceSimulation, many::InitializedManyBodyForce)
   pos = sim.positions

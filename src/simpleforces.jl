@@ -72,17 +72,18 @@ end
 """
     PositionForce(;[target] [, strength])
 
-`PositionForce` represents a force that directly adjusts the velocities of the nodes in a force simulation.
+`PositionForce` represents a force that directions nodes of the 
+simulation towards specific target positions.
 
 ## Arguments 
-- `target`: The target position of each nodes. This can be a single value or an array of values. 
-  The default is (0,0), which tries to center the positions 
+- `target`: The target position of each node. 
+  This can be a single value or an array of values. 
+  The default is (0,0), which tries to center the positions. 
 - `strength`: The strength of the force, which is a real number. The default is 0.1.
 
 ## See also 
 [`ForceSimulation`](@ref)
 """    
-
 struct PositionForce{T}
   args::T
 end 
