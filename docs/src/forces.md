@@ -12,7 +12,7 @@ of scientific accuracy. This includes things like
 
 ## How to give information about the data or graph to influence the forces
 
-[`LinkForce](@ref) takes information about edges along with a number of 
+[`LinkForce`](@ref) takes information about edges along with a number of 
 additional optional weights. If you wish to specify them yourself you can 
 provide
 
@@ -28,7 +28,7 @@ provide
     - `dst`: The destination node.
 You can use this interface for the `distance`, `strength`, and `bias`. 
 
-['ManyBodyForce'](@ref) takes in a `strength` argument that determines
+[`ManyBodyForce`](@ref) takes in a `strength` argument that determines
 the impact on each node. If this is positive, the effect
 is attractive to the node. If it is negative, the effect is repulsive 
 from the node. As before, this can be 
@@ -38,7 +38,7 @@ from the node. As before, this can be
   the function for each node. The function is actually just a `map` over the 
   `nodes` input to the force simulation, as in `map(f, nodes)`. 
 
-['PositionForce'](@ref) takes in a `target` argument that determines
+[`PositionForce`](@ref) takes in a `target` argument that determines
 the target postion for each node. 
 - *a constant*. This constant position is used for all nodes
 - *an array*. The array of positions which needs to have the same order 
