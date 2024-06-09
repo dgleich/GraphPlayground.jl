@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = GraphPlayground
+```
+
 # Forces
 
 The [`ForceSimulator`](@ref) is the key dynamics implementation. It is hugely inspired
@@ -43,6 +47,6 @@ the target postion for each node.
   the function for each node. The function is actually just a `map` over the 
   `nodes` input to the force simulation, as in `map(f, nodes)`. 
 
-  
+
 
 
