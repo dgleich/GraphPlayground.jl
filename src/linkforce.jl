@@ -17,16 +17,18 @@ The force applied between two nodes is based on the strength of the link, the di
 the strength of the edge. The bias of the edge is used to determine how much the nodes
 should move.
 
-For an edge between `src``, `dst``, let ``d`` be the difference vector 
-between the position of `dst`` and `src`` _with their velocity corrections included_.
+For an edge between `src`, `dst`, let ``d`` be the difference vector 
+between the position of `dst` and `src` _with their velocity corrections included_.
 The total force is ``f = \\alpha \\cdot s \\cdot (||d|| - l) / ||d||`` where ``l`` is the ideal distance
 and ``s`` is the strength of the link. The force is applied to the velocity of the nodes
 proportional to the bias of the edge ``\\beta``
 
-      vel[dst] -= ``\\beta f \cdot d``
-      vel[src] += ``(1-\beta) f \cdot d``
+      `vel[dst] -=` ``\\beta f \\cdot d``
+      `vel[src] +=` ``(1-\\beta) f \\cdot d``
 
-The bias is used to determine how much the nodes should move. If the bias is 0, then the
+The bias is used to determine how much the nodes should move. If the bias is 0, then the 
+update is exclusively provided to the `src` node. If the bias is 1, then the update is 
+exclusively provided to the `dst` node.
 
 ## Arguments
 - `edges`: An array of edge structures, where each edge structure contains `src` and `dst` fields
