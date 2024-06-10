@@ -1,4 +1,4 @@
-using Graphs, GLMakie, GraphPlayground, LinearAlgebra
+using Graphs, GLMakie, GraphPlayground
 function stochastic_block_model(blocks::Vector{Int}, p::Matrix{Float64})
   n = sum(blocks)
   g = SimpleGraph(n)
@@ -27,7 +27,7 @@ blocks = [50, 50, 50, 50]
 
 # Probability matrix
 p = ones(length(blocks), length(blocks)) * 0.001
-p .+= 0.1*Diagonal(ones(length(blocks)))
+foreach(i->p[i,i] += 0.1, 1:length(blocks))
 
 # Generate the SBM graph
 g = stochastic_block_model(blocks, p)

@@ -27,6 +27,8 @@ end=#
   include("positionforce.jl")
   include("d3-compare.jl")
 
+  include("examples.jl")
+
   @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(GraphPlayground;
       ambiguities = false
