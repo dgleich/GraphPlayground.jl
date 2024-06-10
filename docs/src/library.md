@@ -9,18 +9,20 @@ playground
 ## Force Simulator Interface
 ```@docs
 ForceSimulation
+fixnode!
+freenode! 
+step!
 LinkForce
 ManyBodyForce
 CollisionForce
 PositionForce
 CenterForce
-fixnode!
-freenode! 
+GraphPlayground.CoolingStepper
 ```
 
 ## Extra window help
 ```@docs
-Window
+GraphPlayground.Window
 ```
 
 ## Index

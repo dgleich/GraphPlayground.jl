@@ -34,7 +34,7 @@ the array.
   any random perturbations if there are degeneracies. The default is to use 
     a deterministic generator so that the results are reproducible.
 - `alpha` is the cooling stepper. This is used to control the rate of convergence.
-  See [`CoolingStepper`](@ref) for more information.
+  See [`GraphPlayground.CoolingStepper`](@ref) for more information.
 - `velocity_decay` is the factor by which the velocities are decayed each step.
   Setting this to 1 will not decay the velocities. Setting it to 0 will stop all motion.
   The default is 0.6.  

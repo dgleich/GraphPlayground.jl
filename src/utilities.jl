@@ -112,6 +112,25 @@ end
 
 
 
+
+mutable struct CoolingStepper{T <: Real}
+  alpha::T
+  alpha_min::T
+  alpha_decay::T
+  alpha_target::T
+end 
+
+function step!(stepper::CoolingStepper)
+  # convert this code 
+  #  alpha += (alphaTarget - alpha) * alphaDecay;  
+  if (stepper.alpha <= stepper.alpha_min) && stepper.alpha_target < stepper.alpha
+    return zero(typeof(stepper.alpha))
+  else 
+    stepper.alpha += (stepper.alpha_target - stepper.alpha) * stepper.alpha_decay
+    return stepper.alpha 
+  end 
+end
+
 """
 A model of the cooling step in d3-force.
 The stepper allows dynamic retargeting of the cooling factor, which is useful 
@@ -136,24 +155,6 @@ for i=1:10
   println(step!(alpha))
 end
 """
-mutable struct CoolingStepper{T <: Real}
-  alpha::T
-  alpha_min::T
-  alpha_decay::T
-  alpha_target::T
-end 
-
-function step!(stepper::CoolingStepper)
-  # convert this code 
-  #  alpha += (alphaTarget - alpha) * alphaDecay;  
-  if (stepper.alpha <= stepper.alpha_min) && stepper.alpha_target < stepper.alpha
-    return zero(typeof(stepper.alpha))
-  else 
-    stepper.alpha += (stepper.alpha_target - stepper.alpha) * stepper.alpha_decay
-    return stepper.alpha 
-  end 
-end
-
 function CoolingStepper(; alpha=1.0, alpha_min=0.001, alpha_decay=1 - alpha_min^(1/300), alpha_target=0.0)
   return CoolingStepper(alpha, alpha_min, alpha_decay, alpha_target)
 end
