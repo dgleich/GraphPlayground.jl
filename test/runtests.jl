@@ -25,6 +25,7 @@ end=#
   include("linkforce.jl")
   include("manybodyforce.jl")
   include("positionforce.jl")
+  include("centerforce.jl")
   include("d3-compare.jl")
 
   include("examples.jl")

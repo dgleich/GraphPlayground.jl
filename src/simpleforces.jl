@@ -35,9 +35,10 @@ end
 ## See also
 [`ForceSimulation`](@ref)
 """    
-CenterForce(center) = CenterForce(center, 1.0, NamedTuple())
-CenterForce(center, strength) = CenterForce(center, strength, NamedTuple())
-CenterForce(;center, strength) = CenterForce(center, strength, NamedTuple()) 
+CenterForce(;center=(0.0f0,0.0f0), strength=1.0f0) = CenterForce(center, strength, NamedTuple()) 
+#CenterForce(center) = CenterForce(center, 1.0, NamedTuple())
+#CenterForce(center, strength) = CenterForce(center, strength, NamedTuple())
+
 
 function initialize(center::CenterForce, nodes; kwargs...)
   return center

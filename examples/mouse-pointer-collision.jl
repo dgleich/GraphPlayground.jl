@@ -46,3 +46,7 @@ GraphPlayground.Window(s; title="Mouse Pointer Repulsion Demo") do _
   step!(sim) # take a step in the simulation
   pos[] = sim.positions .+ Point2f0(width/2, width/2) # update the positions
 end 
+
+## A few things for test cases
+step!(sim) # directly take a step to exercise various portions
+display(sim) 

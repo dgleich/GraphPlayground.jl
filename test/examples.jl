@@ -5,8 +5,10 @@
     @testset "playground" begin
       g = smallgraph(:karate)
       p = playground(g)    
+      display(p.sim)
       GLMakie.closeall()
     end
+
     
     p = playground(g; 
       link_options=(;distance=25), 
