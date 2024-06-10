@@ -4,11 +4,12 @@ CurrentModule = GraphPlayground
 
 # GraphPlayground
 
-Documentation for [GraphPlayground](https://github.com/dgleich/GraphPlayground.jl).
+There are two main components to [GraphPlayground](https://github.com/dgleich/GraphPlayground.jl).
 
-```@index
-```
+- A "easy-to-use" way to play around with a `Graphs.jl` graph 
+  with an interactive window. 
+- An underlying [`ForceSimulation`](@ref) that handles the dynamics. 
 
-```@autodocs
-Modules = [GraphPlayground]
-```
+See the pages in the sidebar for more information. 
+
+

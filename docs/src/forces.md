@@ -4,7 +4,7 @@ CurrentModule = GraphPlayground
 
 # Forces
 
-The [`ForceSimulator`](@ref) is the key dynamics implementation. It is hugely inspired
+The [`ForceSimulation`](@ref) is the key dynamics implementation. It is hugely inspired
 by the excellent `d3-force` library. It's setup for nice displays instead
 of scientific accuracy. This includes things like
 - randomly jiggles to avoid singularities. 

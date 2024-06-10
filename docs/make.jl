@@ -14,6 +14,9 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Forces" => "forces.md",
+        "Library" => "library.md",
+        "Example: Mouse Pointer Repulsion and Collision" => "mouse-pointer-repulsion.md",
     ],
 )
 
