@@ -15,10 +15,12 @@ Usage
 Using it should be as simple as giving the graph (right now, this has to be a graph from `Graphs.jl`) you want to play with to the playground function. 
 ```
 using Graphs, GraphPlayground
-g = smallgraph(:karate))
+g = smallgraph(:karate)
 playground(g)
 ```
 This should open an interactive window that will visualize the graph. 
+
+![An animated image of a graph layout](figures/karate.gif)
 
 But for such a small graph, I find the following looks better. 
 ```
@@ -32,7 +34,7 @@ Unfortunately, tweaking the options is a real thing with this package. Future pl
 Grids or very highly spatial graphs require a little bit more fussing.
 ```
 using Graphs, GraphPlayground, GeometryBasics
-g = grid([100,100]) # make a 20x20 grid from Graphs
+g = grid([100,100]) # make a 100x100 grid from Graphs
 p = playground(g, 
   ForceSimulation(Point2f, vertices(g); 
     link=LinkForce(;edges=edges(g), iterations=10, distance=0.5, strength=1),
@@ -42,6 +44,9 @@ p = playground(g,
 display(p)     
 p.sim.alpha.alpha_target = 0.5 # keep the simulation hot for a while
 ```
+
+![An animated image of a mesh layout](figures/mesh.gif)
+
 This does a few things differently. The defaults are setup for graphs of around 100 nodes. 
 - The code explicitly creates a force simulation. This is what controls how the graph layout works.
 - The force simulation is setup to have: link attractive forces, node/charge repulsion forces, 
@@ -73,7 +78,7 @@ xy = p.sim.positions
 
 This will return an array of node positions. 
 
-See 
+
 
 Important Note
 --------------
