@@ -8,7 +8,7 @@ This is a port of the
 
 ## Required packages
 ```
-using GraphPlayground, StableRNGs, GeometryBasics
+using GraphPlayground, StableRNGs, GeometryBasics, GLMakie
 ```
 We use GeometryBasics for the `Point2f` type. 
 

@@ -1,4 +1,4 @@
-using GraphPlayground, StableRNGs, GeometryBasics
+using GraphPlayground, StableRNGs, GeometryBasics, GLMakie
 
 ## Setup the nodes
 rng = StableRNG(1)
