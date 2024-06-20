@@ -1,5 +1,5 @@
 using Graphs, GLMakie, GraphPlayground
-function stochastic_block_model(blocks::Vector{Int}, p::Matrix{Float64})
+function sbm(blocks::Vector{Int}, p::Matrix{Float64})
   n = sum(blocks)
   g = SimpleGraph(n)
   
@@ -30,6 +30,6 @@ p = ones(length(blocks), length(blocks)) * 0.001
 foreach(i->p[i,i] += 0.1, 1:length(blocks))
 
 # Generate the SBM graph
-g = stochastic_block_model(blocks, p)
+g = sbm(blocks, p)
 
 playground(g) 
