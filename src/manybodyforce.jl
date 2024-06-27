@@ -104,9 +104,8 @@ function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, strengths,
   else 
     left, right = NearestNeighbors.getleft(idx), NearestNeighbors.getright(idx)
 
-    node = T.nodes[idx]
-    split_val = node.split_val
-    split_dim = node.split_dim
+    split_val = T.split_vals[idx]
+    split_dim = T.split_dims[idx]
     rect_right = NearestNeighbors.HyperRectangle(@inbounds(setindex(rect.mins, split_val, split_dim)), rect.maxes)
     rect_left = NearestNeighbors.HyperRectangle(rect.mins, @inbounds setindex(rect.maxes, split_val, split_dim))
 
@@ -121,7 +120,7 @@ function _walk(T::KDTree, n::Int, idx::Int, centers, weights, widths, strengths,
 end
 
 function _build_tree_info(T::KDTree, pts, strengths)
-  n = length(T.nodes) 
+  n = T.tree_data.n_internal_nodes
   centers = Vector{eltype(pts)}(undef, n)
   weights = Vector{eltype(strengths)}(undef, n)
   widths = Vector{_eltype(eltype(pts))}(undef, n)
@@ -152,7 +151,7 @@ end
 function _compute_force_on_node(target, treeindex, targetpt, T, forcefunc, centers, weights, widths, strengths, theta2, vel, velidx)
   #f = 0 .* targetpt
   ncomp = 0 
-  if NearestNeighbors.isleaf(length(T.nodes), treeindex)
+  if NearestNeighbors.isleaf(T.tree_data.n_internal_nodes, treeindex)
     idxmap = T.indices
     treepts = T.data 
     f = 0 .* targetpt

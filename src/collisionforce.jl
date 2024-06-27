@@ -67,7 +67,7 @@ function _walk_maxradius(T::KDTree, n::Int, idx::Int, radii, maxradius)
 end
 
 function _build_tree_info_maxradius(T::KDTree, pts, radii)
-  n = length(T.nodes) 
+  n = T.tree_data.n_internal_nodes
   maxradius = Vector{eltype(radii)}(undef, n) 
   
   _walk_maxradius(T, n, 1, radii, maxradius)
@@ -96,7 +96,7 @@ end
 
 
 function _collision_force_on_node(target, treenode, rect, targetpt, T, maxradii, radii, strengths, rng, vel, velidx)
-  if NearestNeighbors.isleaf(length(T.nodes), treenode)
+  if NearestNeighbors.isleaf(T.tree_data.n_internal_nodes, treenode)
     idxmap = T.indices
     for ptsidx in NearestNeighbors.get_leaf_range(T.tree_data, treenode)
       origidx = T.reordered == false ? ptsidx : idxmap[ptsidx] 
@@ -130,9 +130,8 @@ function _collision_force_on_node(target, treenode, rect, targetpt, T, maxradii,
     maxradius = maxradii[treenode]
     if _check_if_possible_collision(rect, maxradius+radii[velidx], targetpt)
       left, right = NearestNeighbors.getleft(treenode), NearestNeighbors.getright(treenode)
-      node = T.nodes[treenode]
-      split_val = node.split_val
-      split_dim = node.split_dim
+      split_val = T.split_vals[treenode]
+      split_dim = T.split_dims[treenode]
       rect_right = NearestNeighbors.HyperRectangle(@inbounds(setindex(rect.mins, split_val, split_dim)), rect.maxes)
       rect_left = NearestNeighbors.HyperRectangle(rect.mins, @inbounds setindex(rect.maxes, split_val, split_dim))
 
