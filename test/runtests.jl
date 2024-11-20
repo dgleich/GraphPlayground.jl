@@ -30,6 +30,8 @@ end=#
 
   include("examples.jl")
 
+  println("Starting Aqua and JET tests...")
+
   @testset "Code quality (Aqua.jl)" begin
     Aqua.test_all(GraphPlayground;
       ambiguities = false

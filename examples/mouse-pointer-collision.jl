@@ -11,7 +11,7 @@ radius = rand(rng, radiusdist, nnodes )
 radius[end] = 0
 
 ## Create the positions
-pos = [Point2f0(rand(rng, 0:width), rand(rng, 0:width)) for _ in 1:nnodes]
+pos = [Point2f(rand(rng, 0:width), rand(rng, 0:width)) for _ in 1:nnodes]
 pos = pos .- sum(pos) / length(pos) 
 
 
@@ -30,7 +30,7 @@ sim = ForceSimulation(
 
 ## Setup the scene and window
 s = Scene(camera = campixel!, size = (width, width))
-pos = Observable(sim.positions .+ Point2f0(width/2, width/2))
+pos = Observable(sim.positions .+ Point2f(width/2, width/2))
 scatter!(s, 
   pos,
   markersize=pi*radius/1.11, 
@@ -42,9 +42,9 @@ scatter!(s,
 GraphPlayground.Window(s; title="Mouse Pointer Repulsion Demo") do _
   mp = mouseposition(s) # get the mouse position
   @show mp 
-  fixnode!(sim, nnodes, mp .- Point2f0(width/2, width/2)) # fix the last node to the mouse pointer
+  fixnode!(sim, nnodes, mp .- Point2f(width/2, width/2)) # fix the last node to the mouse pointer
   step!(sim) # take a step in the simulation
-  pos[] = sim.positions .+ Point2f0(width/2, width/2) # update the positions
+  pos[] = sim.positions .+ Point2f(width/2, width/2) # update the positions
 end 
 
 ## A few things for test cases
